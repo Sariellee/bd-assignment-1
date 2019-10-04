@@ -27,10 +27,11 @@ public class Indexer {
 
 
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-            JSONObject json = new JSONObject(value.toString());
+            JSONObject json = new JSONObject(value.toString().replaceAll("<[^>]*>", " "));
             StringTokenizer itr = new StringTokenizer(json.getString("text"));
             doc_id.set(json.getInt("id"));
             while (itr.hasMoreTokens()) {
+                System.out.println(term);
                 term.set(itr.nextToken().toLowerCase().replaceAll("[^a-z\\-]", ""));
                 context.write(new TermDocs(doc_id, term), one);
             }
@@ -42,9 +43,8 @@ public class Indexer {
 
         public void reduce(TermDocs key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
             int sum = 0;
-            System.out.println(key.toString());
-            System.out.println(values.toString());
             for (IntWritable val : values) {
+                System.out.println(val.toString());
                 sum+= val.get();
             }
             result.set(sum);
@@ -78,6 +78,8 @@ public class Indexer {
         private IntWritable docId;
 
         TermDocs(){
+            this.term = new Text();
+            this.docId = new IntWritable();
         }
 
         TermDocs(IntWritable docId, Text term) {
@@ -114,11 +116,16 @@ public class Indexer {
 
         @Override
         public String toString() {
-            return term.toString() + "\t" + docId.toString();
+            return "("+term.toString() + "\t" + docId.toString()+")";
         }
 
         public int compareTo(TermDocs termDocs) {
-            return this.docId.compareTo(termDocs.docId);
+            if (this.docId.compareTo(termDocs.docId) == 0){
+                return this.term.compareTo(termDocs.term);
+            }
+            else{
+                return this.docId.compareTo(termDocs.docId);
+            }
         }
     }
 
