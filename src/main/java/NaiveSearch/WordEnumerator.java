@@ -9,6 +9,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.*;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.StringTokenizer;
@@ -23,9 +24,11 @@ public class WordEnumerator {
         private Text word = new Text();
 
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-            StringTokenizer itr = new StringTokenizer(value.toString());
+            JSONObject json = new JSONObject(value.toString().replaceAll("<[^>]*>", " "));
+            StringTokenizer itr = new StringTokenizer(json.getString("text"));
+
             while (itr.hasMoreTokens()) {
-                word.set(itr.nextToken());
+                word.set(itr.nextToken().toLowerCase().replaceAll("[^a-z\\-]", ""));
                 context.write(word, one);
             }
         }
