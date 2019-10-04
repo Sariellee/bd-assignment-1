@@ -12,10 +12,11 @@ buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
 .idea/
-*.iml
 *.iws
 *target*
 *.jar
 *.war
 *.ear
 *.class
+input/
+output/
