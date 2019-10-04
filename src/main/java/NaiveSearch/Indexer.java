@@ -45,7 +45,7 @@ public class Indexer {
 
         docCountJob.waitForCompletion(true);
 
-        Job indexerJob = Job.getInstance(enumeratorConf, "Indexer Job");
+        Job indexerJob = Job.getInstance(indexerJobConf, "Indexer Job");
         FileInputFormat.addInputPath(indexerJob, new Path(args[2]));
         FileOutputFormat.setOutputPath(indexerJob, new Path(args[3]));
 
