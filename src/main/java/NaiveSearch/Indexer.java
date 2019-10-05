@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.StringTokenizer;
 
 public class Indexer {
@@ -167,13 +168,18 @@ public class Indexer {
             public void reduce(IntWritable key, Iterable<WordCount> values, Context context) throws IOException, InterruptedException {
                 int sum = 0;
                 docs.setDocId(key);
+                LinkedList<WordCount> words = new LinkedList<WordCount>();
+
                 //TODO: can count docs here
                 for (WordCount val: values){
                     sum +=val.getCount().get();
+                    System.out.println(val.toString());
+                    words.add(val);
                 }
-                for (WordCount val: values){
-                    docs.setTerm(val.term);
-                    result.set(val.count,new IntWritable(sum));
+                System.out.println(words);
+                for (WordCount w: words){
+                    docs.setTerm(w.term);
+                    result.set(w.count, new IntWritable(sum));
                     context.write(docs, result);
                 }
             }
