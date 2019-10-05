@@ -3,10 +3,7 @@ package NaiveSearch;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -14,13 +11,10 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.json.JSONObject;
 
-import javax.print.Doc;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class Indexer {
     public static class MapJob extends Mapper<Object, Text, TermDocs, IntWritable > {
@@ -57,6 +51,7 @@ public class Indexer {
     public static void main(String[] args) throws Exception{
         Configuration firstJobConf = new Configuration();
         Configuration secondJobConf = new Configuration();
+        Configuration thirdJobConf = new Configuration();
         FileSystem fs = FileSystem.get(firstJobConf);
         if(fs.exists(new Path(args[1]))){
             fs.delete(new Path(args[1]),true);
@@ -92,6 +87,24 @@ public class Indexer {
         secondJob.setMapperClass(SecondJob.MapJob.class);
         secondJob.setReducerClass(SecondJob.ReduceJob.class);
         secondJob.waitForCompletion(true);
+
+
+        Job thirdJob = Job.getInstance(secondJobConf, "Third Job");
+        FileInputFormat.addInputPath(thirdJob, new Path(args[2]));
+        FileOutputFormat.setOutputPath(thirdJob, new Path(args[3]));
+        if(fs.exists(new Path(args[3]))){
+            fs.delete(new Path(args[3]),true);
+        }
+
+        thirdJob.setMapOutputKeyClass(IntWritable.class);
+        thirdJob.setMapOutputValueClass(WordIFIDF.class);
+        thirdJob.setOutputKeyClass(IntWritable.class);
+        thirdJob.setOutputValueClass(Text.class);
+
+        thirdJob.setJarByClass(ThirdJob.class);
+        thirdJob.setMapperClass(ThirdJob.MapJob.class);
+        thirdJob.setReducerClass(ThirdJob.ReduceJob.class);
+        thirdJob.waitForCompletion(true);
     }
     static class TermDocs implements WritableComparable<TermDocs> {
         private Text term;
@@ -186,6 +199,36 @@ public class Indexer {
 
     }
 
+    static class ThirdJob{
+        public static class MapJob extends Mapper<Object, Text, IntWritable, WordIFIDF> {
+
+            private WordIFIDF wc = new WordIFIDF();
+
+            public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+                String line = value.toString();
+                String[] tokens = line.split("\t");
+                String[] word_tokens = tokens[0].split("=");
+                double tfidf = (double) Integer.parseInt(tokens[2])/Integer.parseInt(word_tokens[1]);
+                wc.set(new DoubleWritable(tfidf),new Text(word_tokens[0]));
+                context.write(new IntWritable(Integer.parseInt(tokens[1])),wc);
+
+            }
+        }
+
+        public static class ReduceJob extends Reducer<IntWritable, WordIFIDF, IntWritable, Text> {
+
+            public void reduce(IntWritable key, Iterable<WordIFIDF> values, Context context) throws IOException, InterruptedException {
+                JSONObject json = new JSONObject();
+                for (WordIFIDF val : values) {
+                    json.put(val.term.toString(), val.ifidf.get());
+                }
+                context.write(key, new Text(json.toString()));
+            }
+        }
+
+
+    }
+
     static class WordCount implements Writable {
         private Text term;
         private IntWritable count;
@@ -235,6 +278,58 @@ public class Indexer {
         @Override
         public String toString() {
             return term.toString() + "\t" + count.toString();
+        }
+    }
+
+    static class WordIFIDF implements Writable {
+        private Text term;
+        private DoubleWritable ifidf;
+
+        WordIFIDF() {
+            this.term = new Text();
+            this.ifidf = new DoubleWritable();
+        }
+
+        WordIFIDF(DoubleWritable count, Text term) {
+            this.term = term;
+            this.ifidf = count;
+        }
+
+        public Text getTerm() {
+            return term;
+        }
+
+        public DoubleWritable getIfidf() {
+            return ifidf;
+        }
+
+        public void setIfidf(DoubleWritable ifidf) {
+            this.ifidf = ifidf;
+        }
+
+        public void setTerm(Text term) {
+            this.term = term;
+        }
+
+        public void set(DoubleWritable ifidf, Text term){
+            this.ifidf = ifidf;
+            this.term = term;
+        }
+
+
+        public void readFields(DataInput in) throws IOException {
+            term.readFields(in);
+            ifidf.readFields(in);
+        }
+
+        public void write(DataOutput out) throws IOException {
+            term.write(out);
+            ifidf.write(out);
+        }
+
+        @Override
+        public String toString() {
+            return term.toString() + "\t" + ifidf.toString();
         }
     }
 
