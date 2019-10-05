@@ -34,9 +34,6 @@ public class RelevanceAnalizator {
                 else map.put(tokens[i], map.get(tokens[i])+1);
                 System.out.println(map);
             }
-
-
-
             while (itr.hasMoreTokens()) {
                 word.set(itr.nextToken());
                 System.out.println(word);
