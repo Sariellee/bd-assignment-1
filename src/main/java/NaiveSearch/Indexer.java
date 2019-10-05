@@ -11,6 +11,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.json.JSONObject;
 
+import javax.print.Doc;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -177,16 +178,31 @@ public class Indexer {
         }
 
         public static class ReduceJob extends Reducer<Text, DocCount, TermDocs, IntWritable> {
-            private IntWritable result = new IntWritable();
-            private TermDocs docs = new TermDocs();
+            public static String[] GetStringArray(ArrayList<DocCount> arr)
+            {
 
+                // declaration and initialise String Array
+                String str[] = new String[arr.size()];
+
+                // ArrayList to Array Conversion
+                for (int j = 0; j < arr.size(); j++) {
+
+                    // Assign each value to String array
+                    DocCount dc = arr.get(j);
+                    str[j] = ""+dc.count.get()+dc.docId.get();
+                }
+
+                return str;
+            }
             public void reduce(Text key, Iterable<DocCount> values, Context context) throws IOException, InterruptedException {
+                TermDocs docs = new TermDocs();
                 int sum = 0;
                 ArrayList<DocCount> objs = new ArrayList<DocCount>();
                 for (DocCount val: values){
-                    objs.add(val);
+                    objs.add(new DocCount(val.count, val.docId));
                     sum++;
                 }
+                System.out.println(Arrays.toString(GetStringArray(objs)));
                 docs.setTerm(new Text(key.toString() + "="+sum));
                 for(int i = 0; i < objs.size(); i++)
                 {
