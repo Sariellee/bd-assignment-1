@@ -60,9 +60,12 @@ public class Indexer {
             }
 
             for (String k: json.keySet()){
-                json.put(k, json.getInt(k)/json_freq.getInt(k));
+                try {
+                    json.put(k, json.getInt(k) / json_freq.getInt(k));
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
             }
-            System.out.println(json.toString());
             context.write(key, new Text(json.toString()));
         }
     }
