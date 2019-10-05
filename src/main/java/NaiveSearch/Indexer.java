@@ -14,9 +14,11 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.json.JSONObject;
 
+import javax.print.Doc;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.StringTokenizer;
 
@@ -81,10 +83,10 @@ public class Indexer {
             fs.delete(new Path(args[2]),true);
         }
 
-        secondJob.setMapOutputKeyClass(IntWritable.class);
-        secondJob.setMapOutputValueClass(WordCount.class);
+        secondJob.setMapOutputKeyClass(Text.class);
+        secondJob.setMapOutputValueClass(DocCount.class);
         secondJob.setOutputKeyClass(TermDocs.class);
-        secondJob.setOutputValueClass(CountTotal.class);
+        secondJob.setOutputValueClass(IntWritable.class);
 
         secondJob.setJarByClass(SecondJob.class);
         secondJob.setMapperClass(SecondJob.MapJob.class);
@@ -148,39 +150,36 @@ public class Indexer {
     }
 
     static class SecondJob {
-        public static class MapJob extends Mapper<Object, Text, IntWritable, WordCount> {
+        public static class MapJob extends Mapper<Object, Text, Text, DocCount> {
 
-            private WordCount wordCount = new WordCount();
+            private DocCount dc = new DocCount();
 
 
             public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
                 String line = value.toString();
                 String[] tokens = line.split("\t");
-                wordCount.set(new IntWritable(Integer.parseInt(tokens[2])), new Text(tokens[0]));
-                context.write(new IntWritable(Integer.parseInt(tokens[1])), wordCount);
+                dc.set(new IntWritable(Integer.parseInt(tokens[2])), new IntWritable(Integer.parseInt(tokens[1])));
+                context.write(new Text(tokens[0]), dc);
             }
         }
 
-        public static class ReduceJob extends Reducer<IntWritable, WordCount, TermDocs, CountTotal> {
-            private CountTotal result = new CountTotal();
+        public static class ReduceJob extends Reducer<Text, DocCount, TermDocs, IntWritable> {
+            private IntWritable result = new IntWritable();
             private TermDocs docs = new TermDocs();
 
-            public void reduce(IntWritable key, Iterable<WordCount> values, Context context) throws IOException, InterruptedException {
+            public void reduce(Text key, Iterable<DocCount> values, Context context) throws IOException, InterruptedException {
                 int sum = 0;
-                docs.setDocId(key);
-                LinkedList<WordCount> words = new LinkedList<WordCount>();
-
-                //TODO: can count docs here
-                for (WordCount val: values){
-                    sum +=val.getCount().get();
-                    System.out.println(val.toString());
-                    words.add(val);
+                ArrayList<DocCount> objs = new ArrayList<DocCount>();
+                for (DocCount val: values){
+                    objs.add(val);
+                    sum++;
                 }
-                System.out.println(words);
-                for (WordCount w: words){
-                    docs.setTerm(w.term);
-                    result.set(w.count, new IntWritable(sum));
-                    context.write(docs, result);
+                docs.setTerm(new Text(key.toString() + "="+sum));
+                for(int i = 0; i < objs.size(); i++)
+                {
+                    DocCount obj = objs.get(i);
+                    docs.setDocId(obj.docId);
+                    context.write(docs, obj.count);
                 }
             }
         }
@@ -239,22 +238,22 @@ public class Indexer {
         }
     }
 
-    static class CountTotal implements Writable {
-        private IntWritable total;
+    static class DocCount implements Writable {
+        private IntWritable docId;
         private IntWritable count;
 
-        CountTotal() {
-            this.total = new IntWritable();
+        DocCount() {
+            this.docId = new IntWritable();
             this.count = new IntWritable();
         }
 
-        CountTotal(IntWritable count, IntWritable term) {
-            this.total = term;
+        DocCount(IntWritable count, IntWritable term) {
+            this.docId = term;
             this.count = count;
         }
 
-        public IntWritable getTotal() {
-            return total;
+        public IntWritable getDocId() {
+            return docId;
         }
 
         public IntWritable getCount() {
@@ -265,29 +264,29 @@ public class Indexer {
             this.count = count;
         }
 
-        public void setTotal(IntWritable total) {
-            this.total = total;
+        public void setDocId(IntWritable docId) {
+            this.docId = docId;
         }
 
-        public void set(IntWritable count, IntWritable term){
+        public void set(IntWritable count, IntWritable docId){
             this.count = count;
-            this.total = term;
+            this.docId = docId;
         }
 
 
         public void readFields(DataInput in) throws IOException {
-            total.readFields(in);
+            docId.readFields(in);
             count.readFields(in);
         }
 
         public void write(DataOutput out) throws IOException {
-            total.write(out);
+            docId.write(out);
             count.write(out);
         }
 
         @Override
         public String toString() {
-            return total.toString() + "\t" + count.toString();
+            return docId.toString() + "\t" + count.toString();
         }
     }
 
