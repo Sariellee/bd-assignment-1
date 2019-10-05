@@ -20,3 +20,4 @@ buildNumber.properties
 *.class
 input/
 output/
+.DS_Store
