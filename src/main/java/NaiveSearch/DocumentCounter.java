@@ -26,14 +26,14 @@ public class DocumentCounter {
 
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             int file_id;
-            JSONObject json = new JSONObject(value.toString());
+            JSONObject json = new JSONObject(value.toString().replaceAll("<[^>]*>", " "));
 
             file_id = json.getInt("id");
 
             StringTokenizer itr = new StringTokenizer(json.getString("text").toLowerCase());
 
             while (itr.hasMoreTokens()) {
-                String str = itr.nextToken().replaceAll("[^a-zA-Z]", "");
+                String str = itr.nextToken().toLowerCase().replaceAll("[^a-z\\-]", "");
                 if (str.length() == 0) {
                     continue;
                 }
