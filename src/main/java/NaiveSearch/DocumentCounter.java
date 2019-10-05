@@ -19,36 +19,21 @@ import java.util.*;
 
 
 public class DocumentCounter {
-    static Integer ID = 0;
-    static Map<Integer, String> dictionary_id_file = new HashMap<Integer, String>();
-    static Map<String, Integer> dictionary_file_id = new HashMap<String, Integer>();
 
     public static class TokenizerMapper extends Mapper<Object, Text, Text, IntWritable> {
         private Text word = new Text();
         private IntWritable id = new IntWritable();
 
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-            Integer file_id;
-//            FileSplit fileSplit = (FileSplit) context.getInputSplit();
-//            String file_name = fileSplit.getPath().getName();
-
-            JSONObject json = new JSONObject(value.toString());
-
-//            if (dictionary_file_id.containsKey(file_name)){
-//                file_id = dictionary_file_id.get(file_name);
-//            }else {
-//                file_id = ID;
-//                ID = ID + 1;
-//                dictionary_file_id.put(file_name, file_id);
-//                dictionary_id_file.put(file_id, file_name);
-//            }
+            int file_id;
+            JSONObject json = new JSONObject(value.toString().replaceAll("<[^>]*>", " "));
 
             file_id = json.getInt("id");
 
             StringTokenizer itr = new StringTokenizer(json.getString("text").toLowerCase());
 
             while (itr.hasMoreTokens()) {
-                String str = itr.nextToken().replaceAll("[^a-zA-Z]", "");
+                String str = itr.nextToken().toLowerCase().replaceAll("[^a-z\\-]", "");
                 if (str.length() == 0) {
                     continue;
                 }
@@ -68,7 +53,6 @@ public class DocumentCounter {
             Set set = new HashSet();
 
             for (IntWritable val : values) {
-//                System.out.println(val.toString());
                 set.add(val);
             }
 
