@@ -11,7 +11,6 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.json.JSONObject;
 
-import javax.print.Doc;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -178,31 +177,15 @@ public class Indexer {
         }
 
         public static class ReduceJob extends Reducer<Text, DocCount, TermDocs, IntWritable> {
-            public static String[] GetStringArray(ArrayList<DocCount> arr)
-            {
 
-                // declaration and initialise String Array
-                String str[] = new String[arr.size()];
-
-                // ArrayList to Array Conversion
-                for (int j = 0; j < arr.size(); j++) {
-
-                    // Assign each value to String array
-                    DocCount dc = arr.get(j);
-                    str[j] = ""+dc.count.get()+dc.docId.get();
-                }
-
-                return str;
-            }
             public void reduce(Text key, Iterable<DocCount> values, Context context) throws IOException, InterruptedException {
                 TermDocs docs = new TermDocs();
                 int sum = 0;
                 ArrayList<DocCount> objs = new ArrayList<DocCount>();
                 for (DocCount val: values){
-                    objs.add(new DocCount(val.count, val.docId));
+                    objs.add(new DocCount(new IntWritable(val.count.get()), new IntWritable(val.docId.get())));
                     sum++;
                 }
-                System.out.println(Arrays.toString(GetStringArray(objs)));
                 docs.setTerm(new Text(key.toString() + "="+sum));
                 for(int i = 0; i < objs.size(); i++)
                 {
@@ -243,58 +226,6 @@ public class Indexer {
         }
 
 
-    }
-
-    static class WordCount implements Writable {
-        private Text term;
-        private IntWritable count;
-
-        WordCount() {
-            this.term = new Text();
-            this.count = new IntWritable();
-        }
-
-        WordCount(IntWritable count, Text term) {
-            this.term = term;
-            this.count = count;
-        }
-
-        public Text getTerm() {
-            return term;
-        }
-
-        public IntWritable getCount() {
-            return count;
-        }
-
-        public void setCount(IntWritable count) {
-            this.count = count;
-        }
-
-        public void setTerm(Text term) {
-            this.term = term;
-        }
-
-        public void set(IntWritable count, Text term){
-            this.count = count;
-            this.term = term;
-        }
-
-
-        public void readFields(DataInput in) throws IOException {
-            term.readFields(in);
-            count.readFields(in);
-        }
-
-        public void write(DataOutput out) throws IOException {
-            term.write(out);
-            count.write(out);
-        }
-
-        @Override
-        public String toString() {
-            return term.toString() + "\t" + count.toString();
-        }
     }
 
     static class WordIFIDF implements Writable {
