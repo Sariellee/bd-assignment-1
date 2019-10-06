@@ -104,6 +104,7 @@ public class Query {
         contentExtractorJob.setJarByClass(ContentExtractor.class);
         contentExtractorJob.setMapperClass(ContentExtractor.MapJob.class);
         contentExtractorJob.setReducerClass(ContentExtractor.ReduceJob.class);
+        contentExtractorJob.setSortComparatorClass(ContentExtractor.ReverseDoubleComparator.class);
 
         contentExtractorJob.setMapOutputKeyClass(DoubleWritable.class);
         contentExtractorJob.setMapOutputValueClass(Text.class);
