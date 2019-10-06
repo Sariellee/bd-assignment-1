@@ -28,12 +28,16 @@ class ContentExtractor {
             objs.addAll(Arrays.asList(tokens));
         }
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-            JSONObject json = new JSONObject(value.toString().replaceAll("<[^>]*>", " "));
-            for (String str: objs) {
-                String[] tokens = str.split("\t");
-                if (json.get("id").equals(tokens[0])) {
-                    context.write(new DoubleWritable(Double.parseDouble(tokens[1])), new Text(json.getString("title")+" "+json.get("url")));
+            try {
+                JSONObject json = new JSONObject(value.toString().replaceAll("<[^>]*>", " "));
+                for (String str : objs) {
+                    String[] tokens = str.split("\t");
+                    if (json.get("id").equals(tokens[0])) {
+                        context.write(new DoubleWritable(Double.parseDouble(tokens[1])), new Text(json.getString("title") + " " + json.get("url")));
+                    }
                 }
+            } catch (JSONException e){
+
             }
         }
     }

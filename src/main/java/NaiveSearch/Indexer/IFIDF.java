@@ -4,6 +4,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -24,13 +25,17 @@ class IFIDF {
     public static class ReduceJob extends Reducer<IntWritable, Text, IntWritable, Text> {
 
         public void reduce(IntWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
-            JSONObject json = new JSONObject();
-            for (Text val : values) {
-                String[] tokens = val.toString().split("\t");
+            try {
+                JSONObject json = new JSONObject();
+                for (Text val : values) {
+                    String[] tokens = val.toString().split("\t");
 
-                json.put(tokens[0], tokens[1]);
+                    json.put(tokens[0], tokens[1]);
+                }
+                context.write(key, new Text(json.toString()));
+            } catch (JSONException e){
+
             }
-            context.write(key, new Text(json.toString()));
         }
     }
 }

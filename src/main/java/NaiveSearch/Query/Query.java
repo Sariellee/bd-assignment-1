@@ -86,16 +86,16 @@ public class Query {
 
 
         FileStatus[] status = fs.listStatus(new Path(outIndexer));
-        String doc_files = "";
-        try {
-            for (FileStatus stat : status) {
-                if (stat.getPath().getName().startsWith("dump_of_")) {
-                    doc_files = stat.getPath().getName().replace("dump_of_", "");
-                }
-            }
-        } catch (Exception e){
-            e.printStackTrace();
-        }
+        String doc_files = "input";
+//        try {
+//            for (FileStatus stat : status) {
+//                if (stat.getPath().getName().startsWith("dump_of_")) {
+//                    doc_files = stat.getPath().getName().replace("dump_of_", "");
+//                }
+//            }
+//        } catch (Exception e){
+//            e.printStackTrace();
+//        }
 
         FSDataInputStream analyze = fs.open(new Path(outAnalyzer + "/part-r-00000"));
         String relevance= IOUtils.toString(analyze, "UTF-8");

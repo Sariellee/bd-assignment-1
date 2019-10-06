@@ -18,27 +18,27 @@ public class QueryAnalyzer {
 
 
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-            String line = value.toString();
-            Configuration conf = context.getConfiguration();
-            JSONObject json_query = new JSONObject(conf.get("query"));
-            String[] tokens = line.split("\t");
-            JSONObject json_doc = new JSONObject(tokens[1]);
-            double relevance = 0;
+            try {
+                String line = value.toString();
+                Configuration conf = context.getConfiguration();
+                JSONObject json_query = new JSONObject(conf.get("query"));
+                String[] tokens = line.split("\t");
+                JSONObject json_doc = new JSONObject(tokens[1]);
+                double relevance = 0;
 
-            for (Iterator it = json_query.keys(); it.hasNext(); ) {
-                Object k = it.next();
-                String k1 = k.toString();
-                try{
-                    String[] tfidf = json_doc.getString(k1).split("=");
-                    int tf = Integer.parseInt(tfidf[0]);
-                    double idf = (double) 1/Integer.parseInt(tfidf[1]);
-                    idf *=idf;
-                    relevance += idf*tf*json_query.getDouble(k1);
-                } catch (JSONException e){
-                    e.printStackTrace();
+                for (Iterator it = json_query.keys(); it.hasNext(); ) {
+                    Object k = it.next();
+                    String k1 = k.toString();
+                        String[] tfidf = json_doc.getString(k1).split("=");
+                        int tf = Integer.parseInt(tfidf[0]);
+                        double idf = (double) 1 / Integer.parseInt(tfidf[1]);
+                        idf *= idf;
+                        relevance += idf * tf * json_query.getDouble(k1);
                 }
+                context.write(new DoubleWritable(relevance), new IntWritable(Integer.parseInt(tokens[0])));
+            } catch (JSONException e){
+
             }
-            context.write(new DoubleWritable(relevance), new IntWritable(Integer.parseInt(tokens[0])));
         }
     }
 
