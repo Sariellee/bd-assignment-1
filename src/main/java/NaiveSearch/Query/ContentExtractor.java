@@ -3,6 +3,7 @@ package NaiveSearch.Query;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.*;
+import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.json.JSONObject;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 class ContentExtractor {
+    public enum CountersEnum {RANK}
 
     static class MapJob extends Mapper<Object, Text, DoubleWritable, Text> {
         ArrayList<String> objs = new ArrayList<String>();
@@ -34,11 +36,16 @@ class ContentExtractor {
             }
         }
     }
-    public static class ReduceJob extends Reducer<DoubleWritable, Text, DoubleWritable, Text> {
-
+    public static class ReduceJob extends Reducer<DoubleWritable, Text, IntWritable, Text> {
+        @Override
+        public void setup(Context context) throws IOException,
+                InterruptedException {
+        }
         public void reduce(DoubleWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+            Counter counter = context.getCounter(CountersEnum.class.getName(), CountersEnum.RANK.toString());
             for (Text val: values){
-                context.write(key, val);
+                counter.increment(1);
+                context.write(new IntWritable((int) counter.getValue()), val);
             }
         }
     }

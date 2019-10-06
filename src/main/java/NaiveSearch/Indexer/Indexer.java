@@ -82,6 +82,7 @@ public class Indexer {
         IDFJob.setJarByClass(IDF.class);
         IDFJob.setMapperClass(IDF.MapJob.class);
         IDFJob.setReducerClass(IDF.ReduceJob.class);
+
         IDFJob.waitForCompletion(true);
 
 
@@ -93,7 +94,7 @@ public class Indexer {
         }
 
         IFIDFJob.setMapOutputKeyClass(IntWritable.class);
-        IFIDFJob.setMapOutputValueClass(WordIFIDF.class);
+        IFIDFJob.setMapOutputValueClass(Text.class);
         IFIDFJob.setOutputKeyClass(IntWritable.class);
         IFIDFJob.setOutputValueClass(Text.class);
 
