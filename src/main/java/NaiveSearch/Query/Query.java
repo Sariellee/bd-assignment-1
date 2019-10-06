@@ -21,7 +21,7 @@ public class Query {
     private static final String outAnalyzer = "AnalyzerOut";
     private static final String outQuery = "QueryOut";
     public static final String usage ="" +
-            "Usage: Query yourQuery maxDocuments pathToFiles [OPTIONS [PARAMS]]\n" +
+            "Usage: Query yourQuery maxDocuments pathToFiles [OPTIONS]\n" +
             "yourQuery - query on which the search engine will search\n" +
             "maxDocuments - maximum documents to show in rankings\n" +
             "pathToFiles - files on which index was created and on which we will search\n"+

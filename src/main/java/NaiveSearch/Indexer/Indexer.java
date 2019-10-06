@@ -14,8 +14,8 @@ public class Indexer {
     private static final String outIDF = "outIDFTMP";
     private static final String outIndexer = "IndexerOut";
     public static final String usage ="" +
-            "Usage: Indexer <path_to_files> [OPTIONS [PARAMS]]\n" +
-            "<path_to_files> - directory with files which will be indexed\n\n" +
+            "Usage: Indexer pathToFiles [OPTIONS]\n" +
+            "pathToFiles - directory with files which will be indexed\n\n" +
             "OPTIONS:\n"+
             "--no-cleanup - do not remove intermediate results";
     private static final String[] options = {"--no-cleanup"};
