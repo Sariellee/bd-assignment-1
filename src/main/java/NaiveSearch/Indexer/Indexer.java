@@ -10,36 +10,68 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 public class Indexer {
+    private static final String outCount = "outCountTMP";
+    private static final String outIDF = "outIDFTMP";
+    private static final String outIndexer = "IndexerOut";
+    public static final String usage ="" +
+            "Usage: Indexer <path_to_files> [OPTIONS [PARAMS]]\n" +
+            "<path_to_files> - directory with files which will be indexed\n\n" +
+            "OPTIONS:\n"+
+            "--no-cleanup - do not remove intermediate results";
+    private static final String[] options = {"--no-cleanup"};
+
     public static void main(String[] args) throws Exception {
-
-
-        Configuration IndexerJobConf = new Configuration();
+        boolean cleanup = true;
+        String skip_file = "";
+        if (args.length == 0 || args[0].equals("--help")){
+            System.out.println(usage);
+            System.exit(1);
+        }
+        String input = args[0];
+        Configuration WordCountJobConf = new Configuration();
         Configuration IDFJobConf = new Configuration();
         Configuration IFIDFJobConf = new Configuration();
-        FileSystem fs = FileSystem.get(IndexerJobConf);
-        if (fs.exists(new Path(args[1]))) {
-            fs.delete(new Path(args[1]), true);
+        FileSystem fs = FileSystem.get(WordCountJobConf);
+        if (!fs.exists(new Path(input))){
+            System.out.println("Input directory doesn't exists");
+            System.out.println(usage);
         }
 
-        Job IndexerJob = Job.getInstance(IndexerJobConf, "Count Words Job");
-        FileInputFormat.addInputPath(IndexerJob, new Path(args[0]));
-        FileOutputFormat.setOutputPath(IndexerJob, new Path(args[1]));
+        if (fs.exists(new Path(outCount))) {
+            fs.delete(new Path(outCount), true);
+        }
 
-        IndexerJob.setMapOutputKeyClass(TermDocs.class);
-        IndexerJob.setMapOutputValueClass(IntWritable.class);
-        IndexerJob.setOutputKeyClass(TermDocs.class);
-        IndexerJob.setOutputValueClass(IntWritable.class);
+        Job wordCountJob = Job.getInstance(WordCountJobConf, "Count Words Job");
+        FileInputFormat.addInputPath(wordCountJob, new Path(input));
+        FileOutputFormat.setOutputPath(wordCountJob, new Path(outCount));
 
-        IndexerJob.setJarByClass(CountWords.class);
-        IndexerJob.setMapperClass(CountWords.MapJob.class);
-        IndexerJob.setReducerClass(CountWords.ReduceJob.class);
-        IndexerJob.waitForCompletion(true);
+        for (int i = 1; i <args.length ; i++) {
+            if (args[i].equals(options[0])){
+                cleanup = false;
+            } else{
+                System.out.println("Unknown argument: "+args[i]+"\n");
+                System.out.println(usage);
+                System.exit(1);
+            }
+        }
+
+        wordCountJob.setMapOutputKeyClass(TermDocs.class);
+        wordCountJob.setMapOutputValueClass(IntWritable.class);
+        wordCountJob.setOutputKeyClass(TermDocs.class);
+        wordCountJob.setOutputValueClass(IntWritable.class);
+
+        wordCountJob.setJarByClass(CountWords.class);
+        wordCountJob.setMapperClass(CountWords.MapJob.class);
+        wordCountJob.setReducerClass(CountWords.ReduceJob.class);
+
+
+        wordCountJob.waitForCompletion(true);
 
         Job IDFJob = Job.getInstance(IDFJobConf, "IDF Job");
-        FileInputFormat.addInputPath(IDFJob, new Path(args[1]));
-        FileOutputFormat.setOutputPath(IDFJob, new Path(args[2]));
-        if (fs.exists(new Path(args[2]))) {
-            fs.delete(new Path(args[2]), true);
+        FileInputFormat.addInputPath(IDFJob, new Path(outCount));
+        FileOutputFormat.setOutputPath(IDFJob, new Path(outIDF));
+        if (fs.exists(new Path(outIDF))) {
+            fs.delete(new Path(outIDF), true);
         }
 
         IDFJob.setMapOutputKeyClass(Text.class);
@@ -54,10 +86,10 @@ public class Indexer {
 
 
         Job IFIDFJob = Job.getInstance(IFIDFJobConf, "IFIDF Job");
-        FileInputFormat.addInputPath(IFIDFJob, new Path(args[2]));
-        FileOutputFormat.setOutputPath(IFIDFJob, new Path(args[3]));
-        if (fs.exists(new Path(args[3]))) {
-            fs.delete(new Path(args[3]), true);
+        FileInputFormat.addInputPath(IFIDFJob, new Path(outIDF));
+        FileOutputFormat.setOutputPath(IFIDFJob, new Path(outIndexer));
+        if (fs.exists(new Path(outIndexer))) {
+            fs.delete(new Path(outIndexer), true);
         }
 
         IFIDFJob.setMapOutputKeyClass(IntWritable.class);
@@ -69,5 +101,15 @@ public class Indexer {
         IFIDFJob.setMapperClass(IFIDF.MapJob.class);
         IFIDFJob.setReducerClass(IFIDF.ReduceJob.class);
         IFIDFJob.waitForCompletion(true);
+
+        if (cleanup){
+            if (fs.exists(new Path(outIDF))) {
+                fs.delete(new Path(outIDF), true);
+            }
+            if (fs.exists(new Path(outCount))) {
+                fs.delete(new Path(outCount), true);
+            }
+        }
+
     }
 }
