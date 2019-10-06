@@ -38,6 +38,10 @@ public class RelevanceAnalizator {
             JSONObject dict = new JSONObject(itr.nextToken());
             for (String el:map.keySet()){
                 if (dict.has(el)) {
+                    if (!map_total.containsKey(el))
+                        map_total.put(el, 1);
+                    else map_total.put(el, map_total.get(el)+1);
+
 //                System.out.printf("From JSON %s %f", el, dict.getFloat(el));
                     id.set(el);
                     context.write(id, new Text(dict.getFloat(el) + " " + ind));
@@ -60,12 +64,29 @@ public class RelevanceAnalizator {
     public static class IntSumReducer extends Reducer<Text, Text, Text, Text> {
         private Text result = new Text();
 
-        public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+        public void reduce(Text key, Text values, Context context) throws IOException, InterruptedException {
             int sum = 0;
-            for (Text val : values) {
-                result.set(val);
+//            System.out.println(map_total);
+
+//            String [] doc = values.toString().split(" ", 10);
+            for (String val : map_total.keySet()) {
+//                sum = 0;
+//                StringTokenizer itr = new StringTokenizer(val.toString());
+//                System.out.printf("First el %s, second el %s", itr.nextToken(), itr.nextToken());
+//                String ind = itr.nextToken();
+//                String doc = itr.nextToken();
+//                String doc = itr.nextToken();
+//                sum += Integer.parseInt(itr.nextToken());
+//                sum+=1;
+//                result.set(Integer.toString(sum));
+
+
+//            System.out.println(map);
+                result.set("0");
                 context.write(key,result);
+
             }
+
 //
 //
 //
