@@ -6,6 +6,7 @@ import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;

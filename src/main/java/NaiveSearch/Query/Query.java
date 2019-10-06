@@ -30,7 +30,7 @@ public class Query {
 
     public static void main(String[] args) throws Exception {
         boolean cleanup = true;
-        if (args.length < 2){
+        if (args.length < 2 || args[0].equals("--help")){
             System.out.println(usage);
             System.exit(1);
         }
@@ -62,14 +62,6 @@ public class Query {
         FileSystem fs = FileSystem.get(relevanceAnalyzerConf);
         relevanceAnalyzerConf.set("query", json.toString());
         relevanceAnalyzerConf.setInt("max", maxDocuments);
-        FileStatus[] status = fs.listStatus(new Path(outIndexer));
-        String doc_files = "input";
-
-        for (FileStatus stat: status){
-            if (stat.getPath().getName().startsWith("dump_of_")){
-                doc_files = stat.getPath().getName().replace("dump_of_", "");
-            }
-        }
 
         Job analyzerJob = Job.getInstance(relevanceAnalyzerConf, "Query Analyzer Job");
 
@@ -91,6 +83,19 @@ public class Query {
 
 
         analyzerJob.waitForCompletion(true);
+
+
+        FileStatus[] status = fs.listStatus(new Path(outIndexer));
+        String doc_files = "";
+        try {
+            for (FileStatus stat : status) {
+                if (stat.getPath().getName().startsWith("dump_of_")) {
+                    doc_files = stat.getPath().getName().replace("dump_of_", "");
+                }
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
 
         FSDataInputStream analyze = fs.open(new Path(outAnalyzer + "/part-r-00000"));
         String relevance= IOUtils.toString(analyze, "UTF-8");

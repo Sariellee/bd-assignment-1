@@ -10,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 public class QueryAnalyzer {
@@ -24,14 +25,17 @@ public class QueryAnalyzer {
             JSONObject json_doc = new JSONObject(tokens[1]);
             double relevance = 0;
 
-            for (String k: json_query.keySet()){
+            for (Iterator it = json_query.keys(); it.hasNext(); ) {
+                Object k = it.next();
+                String k1 = k.toString();
                 try{
-                    String[] tfidf = json_doc.getString(k).split("=");
+                    String[] tfidf = json_doc.getString(k1).split("=");
                     int tf = Integer.parseInt(tfidf[0]);
                     double idf = (double) 1/Integer.parseInt(tfidf[1]);
                     idf *=idf;
-                    relevance += idf*tf*json_query.getDouble(k);
+                    relevance += idf*tf*json_query.getDouble(k1);
                 } catch (JSONException e){
+                    e.printStackTrace();
                 }
             }
             context.write(new DoubleWritable(relevance), new IntWritable(Integer.parseInt(tokens[0])));
