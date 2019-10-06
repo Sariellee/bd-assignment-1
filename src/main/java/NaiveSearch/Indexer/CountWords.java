@@ -4,6 +4,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -18,14 +19,18 @@ public class CountWords {
 
 
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-            JSONObject json = new JSONObject(value.toString().replaceAll("<[^>]*>", " "));
-            StringTokenizer itr = new StringTokenizer(json.getString("text"));
-            doc_id.set(json.getInt("id"));
-            while (itr.hasMoreTokens()) {
-                term.set(itr.nextToken().toLowerCase().replaceAll("[^a-z\\-]", ""));
-                if (!term.toString().equals("") && !term.toString().equals("-")) {
-                    context.write(new TermDocs(doc_id, term), one);
+            try {
+                JSONObject json = new JSONObject(value.toString().replaceAll("<[^>]*>", " "));
+                StringTokenizer itr = new StringTokenizer(json.getString("text"));
+                doc_id.set(json.getInt("id"));
+                while (itr.hasMoreTokens()) {
+                    term.set(itr.nextToken().toLowerCase().replaceAll("[^a-z\\-]", ""));
+                    if (!term.toString().equals("") && !term.toString().equals("-")) {
+                        context.write(new TermDocs(doc_id, term), one);
+                    }
                 }
+            }catch (JSONException e ){
+
             }
         }
     }

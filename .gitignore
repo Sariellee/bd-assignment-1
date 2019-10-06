@@ -21,3 +21,4 @@ buildNumber.properties
 input/
 output/
 .DS_Store
+META-INF

@@ -21,21 +21,24 @@ public class Query {
     private static final String outAnalyzer = "AnalyzerOut";
     private static final String outQuery = "QueryOut";
     public static final String usage ="" +
-            "Usage: Query your_query max_documents [OPTIONS [PARAMS]]\n" +
-            "YourQuery - query on which the search engine will search\n" +
-            "MaxDocuments - maximum documents to show in rankings\n" +
+            "Usage: Query yourQuery maxDocuments pathToFiles [OPTIONS [PARAMS]]\n" +
+            "yourQuery - query on which the search engine will search\n" +
+            "maxDocuments - maximum documents to show in rankings\n" +
+            "pathToFiles - files on which index was created and on which we will search\n"+
             "OPTIONS:\n"+
             "--no-cleanup - do not remove intermediate results";
     public static final String[] options = {"--no-cleanup"};
 
     public static void main(String[] args) throws Exception {
         boolean cleanup = true;
-        if (args.length < 2){
+        if (args.length < 3 || args[0].equals("--help")){
             System.out.println(usage);
             System.exit(1);
         }
         String query = args[0];
         int maxDocuments = Integer.parseInt(args[1]);
+        String doc_files = args[2];
+
         JSONObject json = new JSONObject();
         StringTokenizer itr = new StringTokenizer(query.toLowerCase().replaceAll("[^a-z\\- ]", ""));
         while (itr.hasMoreTokens()) {
@@ -47,7 +50,7 @@ public class Query {
             }
         }
 
-        for (int i = 2; i <args.length ; i++) {
+        for (int i = 3; i <args.length ; i++) {
             if (args[i].equals(options[0])){
                 cleanup = false;
             } else{
@@ -62,14 +65,6 @@ public class Query {
         FileSystem fs = FileSystem.get(relevanceAnalyzerConf);
         relevanceAnalyzerConf.set("query", json.toString());
         relevanceAnalyzerConf.setInt("max", maxDocuments);
-        FileStatus[] status = fs.listStatus(new Path(outIndexer));
-        String doc_files = "input";
-
-        for (FileStatus stat: status){
-            if (stat.getPath().getName().startsWith("dump_of_")){
-                doc_files = stat.getPath().getName().replace("dump_of_", "");
-            }
-        }
 
         Job analyzerJob = Job.getInstance(relevanceAnalyzerConf, "Query Analyzer Job");
 
@@ -91,6 +86,9 @@ public class Query {
 
 
         analyzerJob.waitForCompletion(true);
+
+
+        FileStatus[] status = fs.listStatus(new Path(outIndexer));
 
         FSDataInputStream analyze = fs.open(new Path(outAnalyzer + "/part-r-00000"));
         String relevance= IOUtils.toString(analyze, "UTF-8");

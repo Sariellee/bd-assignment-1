@@ -3,18 +3,17 @@ package NaiveSearch.Query;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.*;
-import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 
 class ContentExtractor {
-    public enum CountersEnum {RANK}
-
     static class MapJob extends Mapper<Object, Text, DoubleWritable, Text> {
         ArrayList<String> objs = new ArrayList<String>();
 
@@ -27,12 +26,16 @@ class ContentExtractor {
             objs.addAll(Arrays.asList(tokens));
         }
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-            JSONObject json = new JSONObject(value.toString().replaceAll("<[^>]*>", " "));
-            for (String str: objs) {
-                String[] tokens = str.split("\t");
-                if (json.get("id").equals(tokens[0])) {
-                    context.write(new DoubleWritable(Double.parseDouble(tokens[1])), new Text(json.getString("title")+" "+json.get("url")));
+            try {
+                JSONObject json = new JSONObject(value.toString().replaceAll("<[^>]*>", " "));
+                for (String str : objs) {
+                    String[] tokens = str.split("\t");
+                    if (json.get("id").equals(tokens[0])) {
+                        context.write(new DoubleWritable(Double.parseDouble(tokens[1])), new Text(json.getString("title") + " " + json.get("url")));
+                    }
                 }
+            } catch (JSONException e){
+
             }
         }
     }
@@ -41,11 +44,11 @@ class ContentExtractor {
         public void setup(Context context) throws IOException,
                 InterruptedException {
         }
+        public LinkedList<DoubleWritable> list = new LinkedList<DoubleWritable>();
         public void reduce(DoubleWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
-            Counter counter = context.getCounter(CountersEnum.class.getName(), CountersEnum.RANK.toString());
             for (Text val: values){
-                counter.increment(1);
-                context.write(new IntWritable((int) counter.getValue()), val);
+                list.add(key);
+                context.write(new IntWritable((int) list.size()), val);
             }
         }
     }
