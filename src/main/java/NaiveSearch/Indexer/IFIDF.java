@@ -35,6 +35,4 @@ class IFIDF {
             context.write(key, new Text(json.toString()));
         }
     }
-
-
 }
