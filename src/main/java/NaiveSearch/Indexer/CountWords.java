@@ -23,7 +23,9 @@ public class CountWords {
             doc_id.set(json.getInt("id"));
             while (itr.hasMoreTokens()) {
                 term.set(itr.nextToken().toLowerCase().replaceAll("[^a-z\\-]", ""));
-                context.write(new TermDocs(doc_id, term), one);
+                if (!term.toString().equals("") && !term.toString().equals("-")) {
+                    context.write(new TermDocs(doc_id, term), one);
+                }
             }
         }
     }

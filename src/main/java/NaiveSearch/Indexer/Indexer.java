@@ -82,6 +82,7 @@ public class Indexer {
         IDFJob.setJarByClass(IDF.class);
         IDFJob.setMapperClass(IDF.MapJob.class);
         IDFJob.setReducerClass(IDF.ReduceJob.class);
+
         IDFJob.waitForCompletion(true);
 
 
@@ -93,7 +94,7 @@ public class Indexer {
         }
 
         IFIDFJob.setMapOutputKeyClass(IntWritable.class);
-        IFIDFJob.setMapOutputValueClass(WordIFIDF.class);
+        IFIDFJob.setMapOutputValueClass(Text.class);
         IFIDFJob.setOutputKeyClass(IntWritable.class);
         IFIDFJob.setOutputValueClass(Text.class);
 
@@ -102,6 +103,7 @@ public class Indexer {
         IFIDFJob.setReducerClass(IFIDF.ReduceJob.class);
         IFIDFJob.waitForCompletion(true);
 
+        fs.createNewFile(new Path(outIndexer+"/dump_of_"+input));
         if (cleanup){
             if (fs.exists(new Path(outIDF))) {
                 fs.delete(new Path(outIDF), true);
