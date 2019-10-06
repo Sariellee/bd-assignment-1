@@ -29,7 +29,7 @@ public class QueryAnalyzer {
                     String[] tfidf = json_doc.getString(k).split("=");
                     int tf = Integer.parseInt(tfidf[0]);
                     double idf = (double) 1/Integer.parseInt(tfidf[1]);
-                    idf /=idf;
+                    idf *=idf;
                     relevance += idf*tf*json_query.getDouble(k);
                 } catch (JSONException e){
                 }

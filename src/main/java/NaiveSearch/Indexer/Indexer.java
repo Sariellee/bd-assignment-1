@@ -103,6 +103,7 @@ public class Indexer {
         IFIDFJob.setReducerClass(IFIDF.ReduceJob.class);
         IFIDFJob.waitForCompletion(true);
 
+        fs.createNewFile(new Path(outIndexer+"/dump_of_"+input));
         if (cleanup){
             if (fs.exists(new Path(outIDF))) {
                 fs.delete(new Path(outIDF), true);

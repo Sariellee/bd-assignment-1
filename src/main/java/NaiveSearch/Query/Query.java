@@ -3,6 +3,7 @@ package NaiveSearch.Query;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
@@ -61,6 +62,14 @@ public class Query {
         FileSystem fs = FileSystem.get(relevanceAnalyzerConf);
         relevanceAnalyzerConf.set("query", json.toString());
         relevanceAnalyzerConf.setInt("max", maxDocuments);
+        FileStatus[] status = fs.listStatus(new Path(outIndexer));
+        String doc_files = "input";
+
+        for (FileStatus stat: status){
+            if (stat.getPath().getName().startsWith("dump_of_")){
+                doc_files = stat.getPath().getName().replace("dump_of_", "");
+            }
+        }
 
         Job analyzerJob = Job.getInstance(relevanceAnalyzerConf, "Query Analyzer Job");
 
@@ -80,8 +89,6 @@ public class Query {
         analyzerJob.setOutputKeyClass(IntWritable.class);
         analyzerJob.setOutputValueClass(DoubleWritable.class);
 
-        System.out.println(json.toString());
-
 
         analyzerJob.waitForCompletion(true);
 
@@ -90,8 +97,7 @@ public class Query {
         contentExtractorConf.setStrings("relevance", relevance);
         Job contentExtractorJob = Job.getInstance(contentExtractorConf, "Content Extractor Job");
 
-        //TODO: indexerDocOut?
-        FileInputFormat.addInputPath(contentExtractorJob, new Path("input"));
+        FileInputFormat.addInputPath(contentExtractorJob, new Path(doc_files));
         FileOutputFormat.setOutputPath(contentExtractorJob, new Path(outQuery));
         if (fs.exists(new Path(outQuery))) {
             fs.delete(new Path(outQuery), true);
