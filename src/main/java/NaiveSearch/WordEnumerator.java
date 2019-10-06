@@ -77,6 +77,7 @@ public class WordEnumerator {
         if(fs.exists(new Path(args[1]))){
             fs.delete(new Path(args[1]),true);
         }
+
         Job job = Job.getInstance(conf, "relevance analizator");
         job.setJarByClass(RelevanceAnalizator.class);
         job.setMapperClass(TokenizerMapper.class);
