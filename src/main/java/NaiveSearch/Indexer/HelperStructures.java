@@ -6,59 +6,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-class WordIFIDF implements Writable {
-    private Text term;
-    private DoubleWritable ifidf;
-
-    WordIFIDF() {
-        this.term = new Text();
-        this.ifidf = new DoubleWritable();
-    }
-
-    WordIFIDF(DoubleWritable count, Text term) {
-        this.term = term;
-        this.ifidf = count;
-    }
-
-    public Text getTerm() {
-        return term;
-    }
-
-    public DoubleWritable getIfidf() {
-        return ifidf;
-    }
-
-    public void setIfidf(DoubleWritable ifidf) {
-        this.ifidf = ifidf;
-    }
-
-    public void setTerm(Text term) {
-        this.term = term;
-    }
-
-    public void set(DoubleWritable ifidf, Text term) {
-        this.ifidf = ifidf;
-        this.term = term;
-    }
-
-
-    public void readFields(DataInput in) throws IOException {
-        term.readFields(in);
-        ifidf.readFields(in);
-    }
-
-    public void write(DataOutput out) throws IOException {
-        term.write(out);
-        ifidf.write(out);
-    }
-
-    @Override
-    public String toString() {
-        return term.toString() + "\t" + ifidf.toString();
-    }
-
-}
-
 class DocCount implements Writable {
     private IntWritable docId;
     private IntWritable count;
