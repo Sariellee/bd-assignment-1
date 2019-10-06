@@ -1,6 +1,8 @@
 package NaiveSearch.Query;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
@@ -68,6 +70,7 @@ public class Query {
                 "39\t0.25\n";
         contentExtractorConf.setStrings("relevance", Relevance);
         Job contentExtractorJob = Job.getInstance(contentExtractorConf, "Content Extractor Job");
+        //TODO: indexerDocOut?
         FileInputFormat.addInputPath(contentExtractorJob, new Path("input"));
         FileOutputFormat.setOutputPath(contentExtractorJob, new Path(outQuery));
         if (fs.exists(new Path(outQuery))) {
@@ -76,6 +79,7 @@ public class Query {
         contentExtractorJob.setJarByClass(ContentExtractor.class);
         contentExtractorJob.setMapperClass(ContentExtractor.MapJob.class);
         contentExtractorJob.setReducerClass(ContentExtractor.ReduceJob.class);
+        contentExtractorJob.setSortComparatorClass(ContentExtractor.ReverseDoubleComparator.class);
 
         contentExtractorJob.setMapOutputKeyClass(DoubleWritable.class);
         contentExtractorJob.setMapOutputValueClass(Text.class);
@@ -83,13 +87,15 @@ public class Query {
         contentExtractorJob.setOutputValueClass(Text.class);
 
         contentExtractorJob.waitForCompletion(true);
-
         if (cleanup){
             if (fs.exists(new Path(outAnalyzer))) {
                 fs.delete(new Path(outAnalyzer), true);
             }
         }
-        //TODO: Print result to the console
+        FSDataInputStream file = fs.open(new Path(outQuery + "/part-r-00000"));
+        String out= IOUtils.toString(file, "UTF-8");
+        System.out.println("Result of the query is:");
+        System.out.println(out);
 
         //TODO: add respective classes
     }

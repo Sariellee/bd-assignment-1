@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 class ContentExtractor {
+
     static class MapJob extends Mapper<Object, Text, DoubleWritable, Text> {
         ArrayList<String> objs = new ArrayList<String>();
 
@@ -28,24 +29,31 @@ class ContentExtractor {
             for (String str: objs) {
                 String[] tokens = str.split("\t");
                 if (json.get("id").equals(tokens[0])) {
-                    context.write(new DoubleWritable(-Double.parseDouble(tokens[1])), new Text(json.getString("title")+" "+json.get("url")));
+                    context.write(new DoubleWritable(Double.parseDouble(tokens[1])), new Text(json.getString("title")+" "+json.get("url")));
                 }
             }
-        }
-    }
-    static class MyKeyComparator extends WritableComparator {
-
-        protected MyKeyComparator(Class<? extends WritableComparable> keyClass) {
-            super(keyClass);
         }
     }
     public static class ReduceJob extends Reducer<DoubleWritable, Text, DoubleWritable, Text> {
 
         public void reduce(DoubleWritable key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
             for (Text val: values){
-                key.set(-key.get());
                 context.write(key, val);
             }
+        }
+    }
+    static class ReverseDoubleComparator extends WritableComparator {
+        private static final DoubleWritable.Comparator comparator = new DoubleWritable.Comparator();
+        public ReverseDoubleComparator() {
+            super(DoubleWritable.class);
+        }
+        @Override
+        public int compare(byte[] b1, int s1, int l1, byte[] b2, int s2, int l2) {
+            return (-1)*comparator.compare(b1, s1, l1, b2, s2, l2);
+        }
+        @Override
+        public int compare(WritableComparable a, WritableComparable b) {
+            return (-1)*super.compare(a, b);
         }
     }
 }
