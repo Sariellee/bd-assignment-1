@@ -14,8 +14,33 @@ public class Query {
     private static final String outIndexer = "IndexerOut";
     private static final String outAnalyzer = "AnalyzerOut";
     private static final String outQuery = "QueryOut";
+    public static final String usage ="" +
+            "Usage: Query YourQuery MaxDocuments [OPTIONS [PARAMS]]\n" +
+            "YourQuery - query on which the search engine will search\n" +
+            "MaxDocuments - maximum documents to show in rankings\n" +
+            "OPTIONS:\n"+
+            "--no-cleanup - do not remove intermediate results";
+    public static final String[] options = {"--no-cleanup"};
 
     public static void main(String[] args) throws Exception {
+        boolean cleanup = true;
+        if (args.length < 2){
+            System.out.println(usage);
+            System.exit(1);
+        }
+        String query = args[0];
+        Integer maxDocuments = Integer.parseInt(args[1]);
+
+        for (int i = 2; i <args.length ; i++) {
+            if (args[i].equals(options[0])){
+                cleanup = false;
+            } else{
+                System.out.println("Unknown argument: "+args[i]+"\n");
+                System.out.println(usage);
+                System.exit(1);
+            }
+        }
+
         Configuration relevanceAnalyzer = new Configuration();
         Configuration contentExtractorConf = new Configuration();
         FileSystem fs = FileSystem.get(relevanceAnalyzer);
@@ -59,7 +84,13 @@ public class Query {
 
         contentExtractorJob.waitForCompletion(true);
 
+        if (cleanup){
+            if (fs.exists(new Path(outAnalyzer))) {
+                fs.delete(new Path(outAnalyzer), true);
+            }
+        }
+        //TODO: Print result to the console
+
         //TODO: add respective classes
-        //TODO: clean tmp output
     }
 }
