@@ -61,7 +61,7 @@ public class RelevanceAnalizator {
         }
 
     }
-    public static class IntSumReducer extends Reducer<Text, Text, Text, Text> {
+    public static class IntSumReducer extends Reducer<Text, Text, Text, IntWritable> {
         private Text result = new Text();
 
         public void reduce(Text key, Text values, Context context) throws IOException, InterruptedException {
@@ -82,8 +82,8 @@ public class RelevanceAnalizator {
 
 
 //            System.out.println(map);
-                result.set("0");
-                context.write(key,result);
+//                result.set("0");
+                context.write(key,new IntWritable(0));
 
             }
 
