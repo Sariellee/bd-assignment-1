@@ -48,7 +48,7 @@ OPTIONS:
 ### Contributors
 * Vladislav Savchuk - Implementation of TF/IDF and Content Extractor in Mapreduce, Deployment to the cluster, Optimization of the code, Writing the report
 * Kamil Saitov - Implementation of Word-Doc count in Mapreduce, refactoring 
-* Pavel Nikulin - Implementation of IDF in Mapreduce
+* Pavel Nikulin - Implementation of IDF in Mapreduce, implementation of Vocabulator in Mapreduce
 * Miklashevskaya Daria - Implemenation of Query Analyzer, Document Ranker in Mapreduce, Report writing
 * Everyone - Collaboration, Problem and Bug fixing
 
