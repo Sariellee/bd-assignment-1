@@ -1,9 +1,8 @@
-package NaiveSearch.Query;
+package NaiveSearch;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
@@ -13,6 +12,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.json.JSONObject;
+import NaiveSearch.QueryPack.*;
 
 import java.util.StringTokenizer;
 
@@ -22,21 +22,22 @@ import java.util.StringTokenizer;
 public class Query {
     private static final String outIndexer = "IndexerOut";
     private static final String outAnalyzer = "AnalyzerOut";
-    private static final String outQuery = "QueryOut";
     public static final String usage ="" +
-            "Usage: Query yourQuery maxDocuments pathToFiles [OPTIONS]\n" +
+            "Usage: Query yourQuery maxDocuments pathToFiles [OPTIONS [PARAMS]]\n" +
             "yourQuery - query on which the search engine will search\n" +
             "maxDocuments - maximum documents to show in rankings\n" +
-            "pathToFiles - files on which index was created and on which we will search\n"+
+            "pathToFiles - files on which index was created and on which we will search\n\n"+
             "OPTIONS:\n"+
+            "--output pathToOutput\n"+
             "--no-cleanup - do not remove intermediate results";
-    public static final String[] options = {"--no-cleanup"};
+    public static final String[] options = {"--no-cleanup", "--output"};
 
     public static void main(String[] args) throws Exception {
+        String outQuery = "QueryOut";
         boolean cleanup = true;
 
         // Dealing with args
-        if (args.length < 3 || args[0].equals("--help")){
+        if (args.length < 3 || args[0].equals("--help") || args[0].startsWith("--")||args[1].startsWith("--")||args[2].startsWith("--")){
             System.out.println(usage);
             System.exit(1);
         }
@@ -59,7 +60,14 @@ public class Query {
         for (int i = 3; i <args.length ; i++) {
             if (args[i].equals(options[0])){
                 cleanup = false;
-            } else{
+            } else if(args[i].equals(options[1])) {
+                if (args.length == i+1 || args[i+1].startsWith("--")){
+                    System.out.println("Supply output directory");
+                    System.out.println(usage);
+                    System.exit(1);
+                }
+                outQuery = args[++i];
+            }else{
                 System.out.println("Unknown argument: "+args[i]+"\n");
                 System.out.println(usage);
                 System.exit(1);
@@ -95,8 +103,6 @@ public class Query {
 
         analyzerJob.waitForCompletion(true);
 
-
-        FileStatus[] status = fs.listStatus(new Path(outIndexer));
 
         FSDataInputStream analyze = fs.open(new Path(outAnalyzer + "/part-r-00000"));
         String relevance= IOUtils.toString(analyze, "UTF-8");

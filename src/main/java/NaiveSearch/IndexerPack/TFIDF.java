@@ -1,4 +1,4 @@
-package NaiveSearch.Indexer;
+package NaiveSearch.IndexerPack;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -12,7 +12,7 @@ import java.io.IOException;
 /**
  * A job to compute TF/IDF, outputs document as a key and frequency as value.
  */
-class TFIDF {
+public class TFIDF {
     public static class MapJob extends Mapper<Object, Text, IntWritable, Text> {
 
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {

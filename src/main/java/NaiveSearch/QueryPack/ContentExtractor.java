@@ -1,4 +1,4 @@
-package NaiveSearch.Query;
+package NaiveSearch.QueryPack;
 
 
 import org.apache.hadoop.conf.Configuration;
@@ -16,8 +16,8 @@ import java.util.LinkedList;
 /**
  * A job to extract content in a workable way from the query.
  */
-class ContentExtractor {
-    static class MapJob extends Mapper<Object, Text, DoubleWritable, Text> {
+public class ContentExtractor {
+    public static class MapJob extends Mapper<Object, Text, DoubleWritable, Text> {
         ArrayList<String> objs = new ArrayList<String>();
 
         @Override
@@ -63,7 +63,7 @@ class ContentExtractor {
     /**
      * A WritableComparator with one tweak: it outputs in descending order instead of ascending in the standard class.
      */
-    static class ReverseDoubleComparator extends WritableComparator {
+    public static class ReverseDoubleComparator extends WritableComparator {
         private static final DoubleWritable.Comparator comparator = new DoubleWritable.Comparator();
 
         public ReverseDoubleComparator() {

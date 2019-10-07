@@ -1,4 +1,4 @@
-package NaiveSearch.Query;
+package NaiveSearch.QueryPack;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DoubleWritable;
@@ -17,7 +17,7 @@ import java.util.LinkedList;
  * Query analyzer job. Computes frequency of words in the query.
  */
 public class QueryAnalyzer {
-    static class MapJob extends Mapper<Object, Text, DoubleWritable, IntWritable> {
+    public static class MapJob extends Mapper<Object, Text, DoubleWritable, IntWritable> {
 
 
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {

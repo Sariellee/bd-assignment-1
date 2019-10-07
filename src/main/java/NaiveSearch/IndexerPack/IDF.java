@@ -1,4 +1,4 @@
-package NaiveSearch.Indexer;
+package NaiveSearch.IndexerPack;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -7,14 +7,13 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
 import java.util.ArrayList;
-
 /**
  * IDF job, returns document as the key and frequency as value.
  */
-class IDF {
-    public static class MapJob extends Mapper<Object, Text, Text, DocCount> {
+public class IDF {
+    public static class MapJob extends Mapper<Object, Text, Text, HelperStructures.DocCount> {
 
-        private DocCount dc = new DocCount();
+        private HelperStructures.DocCount dc = new HelperStructures.DocCount();
 
 
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
@@ -25,19 +24,19 @@ class IDF {
         }
     }
 
-    public static class ReduceJob extends Reducer<Text, DocCount, TermDocs, IntWritable> {
+    public static class ReduceJob extends Reducer<Text, HelperStructures.DocCount, HelperStructures.TermDocs, IntWritable> {
 
-        public void reduce(Text key, Iterable<DocCount> values, Context context) throws IOException, InterruptedException {
-            TermDocs docs = new TermDocs();
+        public void reduce(Text key, Iterable<HelperStructures.DocCount> values, Context context) throws IOException, InterruptedException {
+            HelperStructures.TermDocs docs = new HelperStructures.TermDocs();
             int sum = 0;
-            ArrayList<DocCount> objs = new ArrayList<DocCount>();
-            for (DocCount val : values) {
-                objs.add(new DocCount(new IntWritable(val.getCount().get()), new IntWritable(val.getDocId().get())));
+            ArrayList<HelperStructures.DocCount> objs = new ArrayList<HelperStructures.DocCount>();
+            for (HelperStructures.DocCount val : values) {
+                objs.add(new HelperStructures.DocCount(new IntWritable(val.getCount().get()), new IntWritable(val.getDocId().get())));
                 sum++;
             }
             docs.setTerm(new Text(key.toString() + "=" + sum));
             for (int i = 0; i < objs.size(); i++) {
-                DocCount obj = objs.get(i);
+                HelperStructures.DocCount obj = objs.get(i);
                 docs.setDocId(obj.getDocId());
                 context.write(docs, obj.getCount());
             }

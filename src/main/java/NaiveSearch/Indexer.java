@@ -1,5 +1,7 @@
-package NaiveSearch.Indexer;
+package NaiveSearch;
 
+import NaiveSearch.IndexerPack.*;
+import NaiveSearch.IndexerPack.HelperStructures.*;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -25,7 +27,6 @@ public class Indexer {
 
     public static void main(String[] args) throws Exception {
         boolean cleanup = true;
-        String skip_file = "";
         if (args.length == 0 || args[0].equals("--help")) {
             System.out.println(usage);
             System.exit(1);
@@ -42,6 +43,7 @@ public class Indexer {
         if (!fs.exists(new Path(input))) {
             System.out.println("Input directory doesn't exists");
             System.out.println(usage);
+            System.exit(1);
         }
         if (fs.exists(new Path(outCount))) {
             fs.delete(new Path(outCount), true);
