@@ -8,6 +8,9 @@ import org.apache.hadoop.mapreduce.Reducer;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/**
+ * IDF job, returns document as the key and frequency as value.
+ */
 class IDF {
     public static class MapJob extends Mapper<Object, Text, Text, DocCount> {
 

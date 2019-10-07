@@ -1,11 +1,18 @@
 package NaiveSearch.Indexer;
 
-import org.apache.hadoop.io.*;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableComparable;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+/**
+ * A custom Writable suited especially for the task: to count word occurences in a document. Is used in compliment to TermDocs.
+ * Mostly a Writable class with some tweaks.
+ */
 class DocCount implements Writable {
     private IntWritable docId;
     private IntWritable count;
@@ -57,11 +64,15 @@ class DocCount implements Writable {
         return docId.toString() + "\t" + count.toString();
     }
 }
+
+/**
+ * Extended WritableComparable to suit the task: connects word to a document.
+ */
 class TermDocs implements WritableComparable<TermDocs> {
     private Text term;
     private IntWritable docId;
 
-    public TermDocs(){
+    public TermDocs() {
         this.term = new Text();
         this.docId = new IntWritable();
     }
@@ -104,10 +115,9 @@ class TermDocs implements WritableComparable<TermDocs> {
     }
 
     public int compareTo(TermDocs termDocs) {
-        if (this.docId.compareTo(termDocs.docId) == 0){
+        if (this.docId.compareTo(termDocs.docId) == 0) {
             return this.term.compareTo(termDocs.term);
-        }
-        else{
+        } else {
             return this.docId.compareTo(termDocs.docId);
         }
     }

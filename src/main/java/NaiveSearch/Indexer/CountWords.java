@@ -10,6 +10,9 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.StringTokenizer;
 
+/**
+ * Count occurences of a word in document. Returns TermDocs(word, doc) as a key and # of occurences as value.
+ */
 public class CountWords {
     public static class MapJob extends Mapper<Object, Text, TermDocs, IntWritable> {
 
@@ -29,7 +32,7 @@ public class CountWords {
                         context.write(new TermDocs(doc_id, term), one);
                     }
                 }
-            }catch (JSONException e ){
+            } catch (JSONException e) {
 
             }
         }

@@ -13,8 +13,11 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+/**
+ * Query analyzer job. Computes frequency of words in the query.
+ */
 public class QueryAnalyzer {
-    static class MapJob extends Mapper<Object, Text, DoubleWritable, IntWritable > {
+    static class MapJob extends Mapper<Object, Text, DoubleWritable, IntWritable> {
 
 
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
@@ -29,31 +32,33 @@ public class QueryAnalyzer {
                 for (Iterator it = json_query.keys(); it.hasNext(); ) {
                     Object k = it.next();
                     String k1 = k.toString();
-                        String[] tfidf = json_doc.getString(k1).split("=");
-                        int tf = Integer.parseInt(tfidf[0]);
-                        double idf = (double) 1 / Integer.parseInt(tfidf[1]);
-                        idf *= idf;
-                        relevance += idf * tf * json_query.getDouble(k1);
+                    String[] tfidf = json_doc.getString(k1).split("=");
+                    int tf = Integer.parseInt(tfidf[0]);
+                    double idf = (double) 1 / Integer.parseInt(tfidf[1]);
+                    idf *= idf;
+                    relevance += idf * tf * json_query.getDouble(k1);
                 }
                 context.write(new DoubleWritable(relevance), new IntWritable(Integer.parseInt(tokens[0])));
-            } catch (JSONException e){
+            } catch (JSONException e) {
 
             }
         }
     }
 
-    public static class ReduceJob extends Reducer<DoubleWritable, IntWritable , IntWritable, DoubleWritable> {
+    public static class ReduceJob extends Reducer<DoubleWritable, IntWritable, IntWritable, DoubleWritable> {
         private LinkedList<IntWritable> list = new LinkedList<IntWritable>();
         private int doc_count = 0;
+
         @Override
         public void setup(Context context) throws IOException,
                 InterruptedException {
             Configuration conf = context.getConfiguration();
             doc_count = conf.getInt("max", 10);
         }
+
         public void reduce(DoubleWritable key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
             for (IntWritable val : values) {
-                if (list.size() >= doc_count || key.get() == 0.0){
+                if (list.size() >= doc_count || key.get() == 0.0) {
                     continue;
                 }
                 list.add(val);

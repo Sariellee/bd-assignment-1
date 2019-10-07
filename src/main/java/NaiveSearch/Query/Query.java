@@ -16,6 +16,9 @@ import org.json.JSONObject;
 
 import java.util.StringTokenizer;
 
+/**
+ * A main class of Query Analyzer
+ */
 public class Query {
     private static final String outIndexer = "IndexerOut";
     private static final String outAnalyzer = "AnalyzerOut";
@@ -31,6 +34,8 @@ public class Query {
 
     public static void main(String[] args) throws Exception {
         boolean cleanup = true;
+
+        // Dealing with args
         if (args.length < 3 || args[0].equals("--help")){
             System.out.println(usage);
             System.exit(1);
@@ -40,6 +45,7 @@ public class Query {
         String doc_files = args[2];
 
         JSONObject json = new JSONObject();
+        // Removing any comas, colons etc from the query to clean up the query dictionary.
         StringTokenizer itr = new StringTokenizer(query.toLowerCase().replaceAll("[^a-z\\- ]", ""));
         while (itr.hasMoreTokens()) {
             String s = itr.nextToken();
@@ -60,12 +66,14 @@ public class Query {
             }
         }
 
+        // Job configurations
         Configuration relevanceAnalyzerConf = new Configuration();
         Configuration contentExtractorConf = new Configuration();
         FileSystem fs = FileSystem.get(relevanceAnalyzerConf);
         relevanceAnalyzerConf.set("query", json.toString());
         relevanceAnalyzerConf.setInt("max", maxDocuments);
 
+        // Query Analyzer job
         Job analyzerJob = Job.getInstance(relevanceAnalyzerConf, "Query Analyzer Job");
 
         FileInputFormat.addInputPath(analyzerJob, new Path(outIndexer));
@@ -101,6 +109,7 @@ public class Query {
             fs.delete(new Path(outQuery), true);
         }
 
+        // Content Extractor job
         contentExtractorJob.setJarByClass(ContentExtractor.class);
         contentExtractorJob.setMapperClass(ContentExtractor.MapJob.class);
         contentExtractorJob.setReducerClass(ContentExtractor.ReduceJob.class);
@@ -117,6 +126,8 @@ public class Query {
                 fs.delete(new Path(outAnalyzer), true);
             }
         }
+
+        // outputting result
         FSDataInputStream file = fs.open(new Path(outQuery + "/part-r-00000"));
         String out= IOUtils.toString(file, "UTF-8");
         System.out.println("Result of the query is:");

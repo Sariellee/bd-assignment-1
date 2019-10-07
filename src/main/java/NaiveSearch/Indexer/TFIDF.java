@@ -9,15 +9,18 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
-class IFIDF {
+/**
+ * A job to compute TF/IDF, outputs document as a key and frequency as value.
+ */
+class TFIDF {
     public static class MapJob extends Mapper<Object, Text, IntWritable, Text> {
 
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             String line = value.toString();
             String[] tokens = line.split("\t");
             String[] word_tokens = tokens[0].split("=");
-            String tfidf = word_tokens[0]+"\t"+tokens[2]+"="+word_tokens[1];
-            context.write(new IntWritable(Integer.parseInt(tokens[1])),new Text(tfidf));
+            String tfidf = word_tokens[0] + "\t" + tokens[2] + "=" + word_tokens[1];
+            context.write(new IntWritable(Integer.parseInt(tokens[1])), new Text(tfidf));
 
         }
     }
@@ -33,7 +36,7 @@ class IFIDF {
                     json.put(tokens[0], tokens[1]);
                 }
                 context.write(key, new Text(json.toString()));
-            } catch (JSONException e){
+            } catch (JSONException e) {
 
             }
         }
