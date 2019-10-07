@@ -28,7 +28,7 @@ public class Query {
             "maxDocuments - maximum documents to show in rankings\n" +
             "pathToFiles - files on which index was created and on which we will search\n\n"+
             "OPTIONS:\n"+
-            "--output pathToOutput\n"+
+            "--output pathToOutput - custom output directory\n"+
             "--no-cleanup - do not remove intermediate results";
     public static final String[] options = {"--no-cleanup", "--output"};
 
