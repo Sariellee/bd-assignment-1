@@ -22,7 +22,9 @@ After that indexer part is done, it's result is stored on the disk and will be u
 ### Description of the results
 - Firstly, create the index using ```tokyo@namenode:~$ hadoop jar NaiveSearch.jar NaiveSearch.Indexer /EnWikiSmall```
 - Running the job with the query as an argument ```tokyo@namenode:~$ hadoop jar NaiveSearch.jar NaiveSearch.Query russia 10 /EnWikiSmall```
-- The results of the search: ![](https://i.imgur.com/jOuEART.png)
+- The results of the search: 
+
+![](https://i.imgur.com/jOuEART.png)
 
 
 ### Usage
