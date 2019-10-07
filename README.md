@@ -15,39 +15,48 @@ After that indexer part is done, it's result is stored on the disk and will be u
 
 
 ### Design decisions
-- We decided not to implement the Vocabulary because it is inefficient to reference the file during each mapping
+- We decided not to implement the Vocabulary as it would add additional complexity to the simple search engine, requiring us to map words to ids and backwards.
 - We decided to use the relevance score based on dot product because this is simpler and easier to understand ☺
 
 
 ### Description of the results
-- Firstly, create the index using ```tokyo@namenode:~$ hadoop jar Indexer.jar /EnWikiSmall/```
-- Running the job with the query as an argument ```tokyo@namenode:~$ hadoop jar Query.jar russia 5 /EnWikiSmall/```
-- The results of the search: ![](https://i.imgur.com/QaNApIB.png)
+- Firstly, create the index using ```tokyo@namenode:~$ hadoop jar NaiveSearch.jar NaiveSearch.Indexer /EnWikiSmall```
+- Running the job with the query as an argument ```tokyo@namenode:~$ hadoop jar NaiveSearch.jar NaiveSearch.Query russia 10 /EnWikiSmall```
+- The results of the search: ![](https://i.imgur.com/jOuEART.png)
+
 
 ### Usage
 Usage of Indexer.jar
 ```
-Indexer pathToFiles [OPTIONS [PARAMS]]
+Indexer pathToFiles [OPTIONS]
 pathToFiles - directory with files which will be indexed
 
 OPTIONS:
 --no-cleanup - do not remove intermediate results
 ```
-
+Example of running: 
+```
+hadoop jar NaiveSearch.jar NaiveSearch.Indexer /EnWikiSmall
+```
 Usage of Query.jar
 ```
-Query yourQuery maxDocuments pathToFiles [OPTIONS]
+Query yourQuery maxDocuments pathToFiles [OPTIONS [PARAMS]]
 yourQuery - query on which the search engine will search
 maxDocuments - maximum documents to show in rankings
 pathToFiles - files on which index was created and on which we will search
 
 OPTIONS:
+--output pathToOutput - custom output directory
 --no-cleanup - do not remove intermediate results
+```
+Example of running: 
+```
+hadoop jar NaiveSearch.jar NaiveSearch.Query russia 10 /EnWikiSmall --output out-wp
 ```
 
 ### Contributors
 * Vladislav Savchuk - Implementation of TF/IDF and Content Extractor in Mapreduce, Deployment to the cluster, Optimization of the code, Writing the report
-* Kamil Saitov - Implementation of Word-Doc count in Mapreduce, refactoring 
+* Kamil Saitov - Implementation of Word-Doc count in Mapreduce, refactoring and commenting
 * Pavel Nikulin - Implementation of IDF in Mapreduce, implementation of Vocabulator in Mapreduce
 * Miklashevskaya Daria - Implemenation of Query Analyzer, Document Ranker in Mapreduce, Report writing
 * Everyone - Collaboration, Problem and Bug fixing
