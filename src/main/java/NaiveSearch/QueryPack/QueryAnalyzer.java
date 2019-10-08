@@ -38,9 +38,9 @@ public class QueryAnalyzer {
                     double idf = (double) 1 / Integer.parseInt(tfidf[1]); //and its idf
                     idf *= idf;
                     total +=json_query.getDouble(k1);
-                    relevance += idf * tf * json_query.getDouble(k1)/total;
+                    relevance += idf * tf * json_query.getDouble(k1);
                 }
-//                System.out.println(json_query.length());
+                relevance = relevance /total;
                 context.write(new DoubleWritable(relevance), new IntWritable(Integer.parseInt(tokens[0])));
             } catch (JSONException e) {
 
@@ -65,6 +65,7 @@ public class QueryAnalyzer {
                     continue;
                 }
                 list.add(val);
+                System.out.println(val);
                 context.write(val, key);
             }
         }
