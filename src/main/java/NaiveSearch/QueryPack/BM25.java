@@ -35,8 +35,9 @@ public class BM25 {
                     String[] tfidf = json_doc.getString(k1).split("="); //tfidf for a word for a doc
                     int tf = Integer.parseInt(tfidf[0]); //tf for a doc
                     double idf = (double) 1 / Integer.parseInt(tfidf[1]); //and its idf
-                    idf *= idf;
+//                    idf *= idf;
                     relevance += idf * tf * json_query.getDouble(k1);
+                    System.out.println(json_query.getDouble(k1));
                 }
                 context.write(new DoubleWritable(relevance), new IntWritable(Integer.parseInt(tokens[0])));
             } catch (JSONException e) {
