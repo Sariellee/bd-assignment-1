@@ -6,11 +6,11 @@ After looking at the task and given example in the document, we have come up wit
 ![](https://i.imgur.com/LRoBQEh.png)
 1. Enumerator receives the text corpus and counts the (word, doc_id) pair (MapReduce job)
 2. IDF then counts respective IDF for each word (MapReduce job)
-3. Indexer transforms the data to Map Representation of the document (DOC_id, {word:TF/IDF}) and stores the result on the disk 
+3. Indexer transforms the data to Map Representation of the document (DOC_id, {word:TF/IDF}) and stores the result on the disk (MapReduce Job)
 
 After that indexer part is done, it's result is stored on the disk and will be used by relevance analyzer.
 
-4. Relevance analizator calculates the relevance score of each documents for the given query (MapReduce job)
+4. Relevance analizator calculates the relevance score of each documents for the given query and returns the  (MapReduce job)
 5. Content Extractor look in the all texts and gives the user ranked documents with title and link, prints it to the console and also saves on the disk (MapReduce job)
 
 
