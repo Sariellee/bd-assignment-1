@@ -25,8 +25,17 @@ public class ContentExtractor {
                 InterruptedException {
             Configuration conf = context.getConfiguration();
             String param = conf.get("relevance");
-            String[] tokens = param.split("\n");
-            objs.addAll(Arrays.asList(tokens));
+            if (param != null) {
+                String[] tokens = param.split("\n");
+                objs.addAll(Arrays.asList(tokens));
+            }
+//            else {
+//                param = "";
+//                String[] tokens = param.split("\n");
+//                objs.addAll(Arrays.asList(tokens));
+//            }
+
+
         }
 
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
