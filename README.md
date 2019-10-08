@@ -17,6 +17,7 @@ After that indexer part is done, it's result is stored on the disk and will be u
 ### Design decisions
 - We decided not to implement the Vocabulary as it would add additional complexity to the simple search engine, requiring us to map words to ids and backwards.
 - We decided to use the relevance score based on dot product because this is simpler and easier to understand ☺
+- To speed up computations we have designed Indexer component so it opens text corpus only once.
 
 
 ### Description of the results
