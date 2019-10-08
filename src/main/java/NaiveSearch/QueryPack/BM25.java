@@ -16,7 +16,7 @@ import java.util.LinkedList;
 /**
  * Query analyzer job. Computes frequency of words in the query and relevance score for each document.
  */
-public class QueryAnalyzer {
+public class BM25 {
     public static class MapJob extends Mapper<Object, Text, DoubleWritable, IntWritable> {
 
 
