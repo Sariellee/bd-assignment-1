@@ -137,7 +137,9 @@ public class Query {
         FSDataInputStream file = fs.open(new Path(outQuery + "/part-r-00000"));
         String out= IOUtils.toString(file, "UTF-8");
         System.out.println("Result of the query is:");
-        System.out.println(out);
+        if (out.equals(""))
+            System.out.println("No articles were found. Try to change your query or ask something else ツ");
+        else System.out.println(out);
 
     }
 }

@@ -14,7 +14,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
- * Query analyzer job. Computes frequency of words in the query.
+ * Query analyzer job. Computes frequency of words in the query and relevance score for each document.
  */
 public class QueryAnalyzer {
     public static class MapJob extends Mapper<Object, Text, DoubleWritable, IntWritable> {
@@ -35,12 +35,11 @@ public class QueryAnalyzer {
                     String[] tfidf = json_doc.getString(k1).split("=");
                     int tf = Integer.parseInt(tfidf[0]);
                     double idf = (double) 1 / Integer.parseInt(tfidf[1]);
-                    idf *= idf;
-                    relevance += idf * tf * json_query.getDouble(k1);
+                    relevance += idf * tf * json_query.getDouble(k1) * idf;
                 }
                 context.write(new DoubleWritable(relevance), new IntWritable(Integer.parseInt(tokens[0])));
             } catch (JSONException e) {
-
+                System.out.println("Exception!");
             }
         }
     }
@@ -62,6 +61,7 @@ public class QueryAnalyzer {
                     continue;
                 }
                 list.add(val);
+                System.out.println(val);
                 context.write(val, key);
             }
         }
