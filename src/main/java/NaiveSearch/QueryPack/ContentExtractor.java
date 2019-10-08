@@ -29,11 +29,6 @@ public class ContentExtractor {
                 String[] tokens = param.split("\n");
                 objs.addAll(Arrays.asList(tokens));
             }
-//            else {
-//                param = "";
-//                String[] tokens = param.split("\n");
-//                objs.addAll(Arrays.asList(tokens));
-//            }
 
 
         }

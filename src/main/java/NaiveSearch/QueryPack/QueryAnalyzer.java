@@ -22,21 +22,21 @@ public class QueryAnalyzer {
 
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             try {
-                String line = value.toString(); // read a line in file
+                String line = value.toString();
                 Configuration conf = context.getConfiguration();
                 JSONObject json_query = new JSONObject(conf.get("query"));
-                String[] tokens = line.split("\t"); // split it into words
-                JSONObject json_doc = new JSONObject(tokens[1]); // doc id
+                String[] tokens = line.split("\t");
+                JSONObject json_doc = new JSONObject(tokens[1]);
                 double relevance = 0;
                 double total = 0;
 
-                for (Iterator it = json_query.keys(); it.hasNext(); ) { //for each word in a query
-                    Object k = it.next(); //for next word
+                for (Iterator it = json_query.keys(); it.hasNext(); ) {
+                    Object k = it.next();
                     String k1 = k.toString();
-                    String[] tfidf = json_doc.getString(k1).split("="); //tfidf for a word for a doc
-                    int tf = Integer.parseInt(tfidf[0]); //tf for a doc
-                    double idf = (double) 1 / Integer.parseInt(tfidf[1]); //and its idf
-                    idf *= idf;
+                    String[] tfidf = json_doc.getString(k1).split("=");
+                    int tf = Integer.parseInt(tfidf[0]);
+                    double idf = (double) 1 / Integer.parseInt(tfidf[1]);
+//                    idf *= idf;
                     total +=json_query.getDouble(k1);
                     relevance += idf * tf * json_query.getDouble(k1);
                 }
