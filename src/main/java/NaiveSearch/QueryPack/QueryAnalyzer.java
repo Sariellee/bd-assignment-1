@@ -28,7 +28,6 @@ public class QueryAnalyzer {
                 String[] tokens = line.split("\t");
                 JSONObject json_doc = new JSONObject(tokens[1]);
                 double relevance = 0;
-                double total = 0;
 
                 for (Iterator it = json_query.keys(); it.hasNext(); ) {
                     Object k = it.next();
@@ -36,14 +35,11 @@ public class QueryAnalyzer {
                     String[] tfidf = json_doc.getString(k1).split("=");
                     int tf = Integer.parseInt(tfidf[0]);
                     double idf = (double) 1 / Integer.parseInt(tfidf[1]);
-//                    idf *= idf;
-                    total +=json_query.getDouble(k1);
-                    relevance += idf * tf * json_query.getDouble(k1);
+                    relevance += idf * tf * json_query.getDouble(k1) * idf;
                 }
-                relevance = relevance /total;
                 context.write(new DoubleWritable(relevance), new IntWritable(Integer.parseInt(tokens[0])));
             } catch (JSONException e) {
-
+                System.out.println("Exception!");
             }
         }
     }
